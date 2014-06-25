@@ -1,17 +1,14 @@
-#
-# key mapping
-#
-alt+j:moveFocusDown
-alt+k:moveFocusUp
-alt+h:moveFocusLeft
-alt+l:moveFoculRight
+alt+j MoveFocusDown
+alt+k MoveFocusUp
+alt+h MoveFocusLeft
+alt+l MoveFoculRight
 
-alt+shift+j:moveWindowDown
-alt+shift+k:moveWindowUp
-alt+shift+h:moveWindowLeft
-alt+shift+l:moveWindowRight
+alt+shift+j MoveWindowDown
+alt+shift+k MoveWindowUp
+alt+shift+h MoveWindowLeft
+alt+shift+l MoveWindowRight
 
-alt+shift+1:moveWindowToDesktop Dev1
-alt+shift+2:moveWindowToDesktop Dev2
-alt+shift+3:moveWindowToDesktop Db
-alt+shift+4:moveWindowToDesktop Misc
+alt+shift+1 MoveWindowToDesktop Dev1
+alt+shift+2 MoveWindowToDesktop Dev2
+alt+shift+3 MoveWindowToDesktop Db
+alt+shift+4 MoveWindowToDesktop Misc

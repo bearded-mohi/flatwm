@@ -16,5 +16,6 @@ typedef enum {
 } Command;
 
 Command parseCommand(char * raw);
+void dispatchCommand(HWND selfHwnd, Command cmd);
 
 #endif

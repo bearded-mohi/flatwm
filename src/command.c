@@ -1,20 +1,83 @@
 #include <string.h>
+#include <windows.h>
 #include "command.h"
 
-#ifndef RESOLVE_COMMAND
-#define RESOLVE_COMMAND(str) if(0 == strcmp(raw, "str")) { return Command_##str; } 
+#ifndef PARSE_COMMAND
+#define PARSE_COMMAND(c) if(0 == strcmp(raw, #c)) { return Command_##c; } 
 #endif
 
+#ifndef DISPATCH_COMMAND
+#define DISPATCH_COMMAND(c) if(Command_##c == cmd) { c##Impl(selfHwnd); }
+#endif
+
+static void QuitImpl(HWND selfHwnd) {
+	SendMessage(selfHwnd, WM_DESTROY, 0, 0);
+}
+
+static void MoveFocusDownImpl(HWND selfHwnd) {
+	MessageBox(NULL, TEXT("MoveFocusDownImpl"), TEXT("Debug"), MB_OK);
+}
+
+static void MoveFocusUpImpl(HWND selfHwnd) {
+	MessageBox(NULL, TEXT("MoveFocusUpImpl"), TEXT("Debug"), MB_OK);
+}
+
+static void MoveFocusLeftImpl(HWND selfHwnd) {
+	MessageBox(NULL, TEXT("MoveFocusLeftImpl"), TEXT("Debug"), MB_OK);
+}
+
+static void MoveFocusRightImpl(HWND selfHwnd) {
+	MessageBox(NULL, TEXT("MoveFocusRightImpl"), TEXT("Debug"), MB_OK);
+}
+
+static void MoveWindowDownImpl(HWND selfHwnd) {
+	MessageBox(NULL, TEXT("MoveWindowDown"), TEXT("Debug"), MB_OK);
+}
+
+static void MoveWindowUpImpl(HWND selfHwnd) {
+	MessageBox(NULL, TEXT("MoveWindowUpImpl"), TEXT("Debug"), MB_OK);
+}
+
+static void MoveWindowLeftImpl(HWND selfHwnd) {
+	MessageBox(NULL, TEXT("MoveWindowLeftImpl"), TEXT("Debug"), MB_OK);
+}
+
+static void MoveWindowRightImpl(HWND selfHwnd) {
+	MessageBox(NULL, TEXT("MoveWindowRightImpl"), TEXT("Debug"), MB_OK);
+}
+
+static void MoveWindowToDesktopImpl(HWND selfHwnd) {
+	MessageBox(NULL, TEXT("MoveWindowToDesktopImpl"), TEXT("Debug"), MB_OK);
+}
+
+static void UnknownImpl(HWND selfHwnd) {
+	MessageBox(NULL, TEXT("WAT??"), TEXT("Debug"), MB_OK);
+}
+
 Command parseCommand(char * raw) {
-	RESOLVE_COMMAND(Quit)
-	RESOLVE_COMMAND(MoveFocusDown)
-	RESOLVE_COMMAND(MoveFocusUp)
-	RESOLVE_COMMAND(MoveFocusLeft)
-	RESOLVE_COMMAND(MoveFocusRight)
-	RESOLVE_COMMAND(MoveWindowDown)
-	RESOLVE_COMMAND(MoveWindowUp)
-	RESOLVE_COMMAND(MoveWindowLeft)
-	RESOLVE_COMMAND(MoveWindowRight)
-	RESOLVE_COMMAND(MoveWindowToDesktop)
+	PARSE_COMMAND(Quit)
+	PARSE_COMMAND(MoveFocusDown)
+	PARSE_COMMAND(MoveFocusUp)
+	PARSE_COMMAND(MoveFocusLeft)
+	PARSE_COMMAND(MoveFocusRight)
+	PARSE_COMMAND(MoveWindowDown)
+	PARSE_COMMAND(MoveWindowUp)
+	PARSE_COMMAND(MoveWindowLeft)
+	PARSE_COMMAND(MoveWindowRight)
+	PARSE_COMMAND(MoveWindowToDesktop)
 	return Command_Unknown;
+}
+
+void dispatchCommand(HWND selfHwnd, Command cmd) {
+	DISPATCH_COMMAND(Quit)
+	DISPATCH_COMMAND(MoveFocusDown)
+	DISPATCH_COMMAND(MoveFocusUp)
+	DISPATCH_COMMAND(MoveFocusLeft)
+	DISPATCH_COMMAND(MoveFocusRight)
+	DISPATCH_COMMAND(MoveWindowDown)
+	DISPATCH_COMMAND(MoveWindowUp)
+	DISPATCH_COMMAND(MoveWindowLeft)
+	DISPATCH_COMMAND(MoveWindowRight)
+	DISPATCH_COMMAND(MoveWindowToDesktop)
+	DISPATCH_COMMAND(Unknown)
 }

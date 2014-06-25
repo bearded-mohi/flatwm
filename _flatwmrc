@@ -1,0 +1,17 @@
+#
+# key mapping
+#
+alt+j:moveFocusDown
+alt+k:moveFocusUp
+alt+h:moveFocusLeft
+alt+l:moveFoculRight
+
+alt+shift+j:moveWindowDown
+alt+shift+k:moveWindowUp
+alt+shift+h:moveWindowLeft
+alt+shift+l:moveWindowRight
+
+alt+shift+1:moveWindowToDesktop Dev1
+alt+shift+2:moveWindowToDesktop Dev2
+alt+shift+3:moveWindowToDesktop Db
+alt+shift+4:moveWindowToDesktop Misc

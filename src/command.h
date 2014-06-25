@@ -12,6 +12,7 @@ typedef enum {
 	Command_MoveWindowLeft,
 	Command_MoveWindowRight,
 	Command_MoveWindowToDesktop,
+	Command_EnumWindows,
 	Command_Unknown
 } Command;
 

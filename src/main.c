@@ -5,6 +5,7 @@
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch(msg) {
 		case WM_CREATE:
+			//TODO: read config path from command line arg
 			readConfig("_flatwmrc");
 			registerHotkeys(hwnd);
 			break;
@@ -19,12 +20,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	return DefWindowProcW(hwnd, msg, wParam, lParam);
 }
 
-int CALLBACK WinMain(
-  HINSTANCE hInstance,
-  HINSTANCE hPrevInstance,
-  LPSTR lpCmdLine,
-  int nCmdShow
-) {
+int CALLBACK WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	MSG msg;
 	HWND hwnd;
 	WNDCLASSW wc;
@@ -45,6 +41,7 @@ int CALLBACK WinMain(
 	            WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 	            100, 100, 350, 250, NULL, NULL, hInstance, NULL);  
 
+	//TODO: hide window
 	ShowWindow(hwnd, nCmdShow);
 	UpdateWindow(hwnd);				
 

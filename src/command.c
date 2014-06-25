@@ -50,6 +50,17 @@ static void MoveWindowToDesktopImpl(HWND selfHwnd) {
 	MessageBox(NULL, TEXT("MoveWindowToDesktopImpl"), TEXT("Debug"), MB_OK);
 }
 
+static BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
+	char caption[256];
+	GetWindowText(hwnd, caption, 256);
+	MessageBox(NULL, caption, TEXT("Debug"), MB_OK);
+	return TRUE;
+}
+
+static void EnumWindowsImpl(HWND selfHwnd) {
+	EnumWindows(EnumWindowsProc, 0);
+}
+
 static void UnknownImpl(HWND selfHwnd) {
 	MessageBox(NULL, TEXT("WAT??"), TEXT("Debug"), MB_OK);
 }
@@ -65,6 +76,7 @@ Command parseCommand(char * raw) {
 	PARSE_COMMAND(MoveWindowLeft)
 	PARSE_COMMAND(MoveWindowRight)
 	PARSE_COMMAND(MoveWindowToDesktop)
+	PARSE_COMMAND(EnumWindows)
 	return Command_Unknown;
 }
 
@@ -79,5 +91,6 @@ void dispatchCommand(HWND selfHwnd, Command cmd) {
 	DISPATCH_COMMAND(MoveWindowLeft)
 	DISPATCH_COMMAND(MoveWindowRight)
 	DISPATCH_COMMAND(MoveWindowToDesktop)
+	DISPATCH_COMMAND(EnumWindows)
 	DISPATCH_COMMAND(Unknown)
 }

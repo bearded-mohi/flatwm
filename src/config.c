@@ -28,6 +28,7 @@ static Hotkey parseHotkey(char * rawKey, char * rawCmd) {
 		} else if(0 == strcmp(p, "shift")) {
 			hk.mod |= MOD_SHIFT;
 		} else if(1 == strlen(p)) {
+			//TODO: recognize arrows like up, down, left, right
 			hk.vk = VkKeyScan(p[0]) & 0xff;
 		}
 	}			

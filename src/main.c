@@ -1,4 +1,5 @@
 #include <windows.h>
+
 #include "config.h"
 #include "command.h"
 #include "layout.h"
@@ -25,27 +26,23 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 int CALLBACK WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	MSG msg;
-	HWND hwnd;
-	WNDCLASSW wc;
+	WNDCLASSEX wx;
 
-	wc.style         = CS_HREDRAW | CS_VREDRAW;
-	wc.cbClsExtra    = 0;
-	wc.cbWndExtra    = 0;
-	wc.lpszClassName = L"Window";
-	wc.hInstance     = hInstance;
-	wc.hbrBackground = GetSysColorBrush(COLOR_3DFACE);
-	wc.lpszMenuName  = NULL;
-	wc.lpfnWndProc   = WndProc;
-	wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
-	wc.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
+	wx.cbSize        = sizeof(WNDCLASSEX);
+    wx.style         = 0;
+    wx.lpfnWndProc   = WndProc;
+    wx.cbClsExtra    = 0;
+    wx.cbWndExtra    = 0;
+    wx.hInstance     = hInstance;
+    wx.hIcon         = 0;
+    wx.hCursor       = 0;
+    wx.hbrBackground = 0;
+    wx.lpszMenuName  = 0;
+    wx.lpszClassName = TEXT("flatwm");
+    wx.hIconSm       = 0;
 
-	RegisterClassW(&wc);
-	hwnd = CreateWindowW( wc.lpszClassName, L"Window",
-	            WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-	            100, 100, 350, 250, NULL, NULL, hInstance, NULL);  
-
-	ShowWindow(hwnd, SW_HIDE);
-	UpdateWindow(hwnd);				
+	RegisterClassEx(&wx);
+	CreateWindowEx(0, wx.lpszClassName, TEXT("Dummy"), 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL); 	
 
 	while(GetMessage(&msg, NULL, 0, 0)) {
 		DispatchMessage(&msg);

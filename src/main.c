@@ -1,6 +1,7 @@
 #include <windows.h>
 #include "config.h"
 #include "command.h"
+#include "layout.h"
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch(msg) {
@@ -8,12 +9,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			//TODO: read config path from command line arg
 			readConfig("_flatwmrc");
 			registerHotkeys(hwnd);
+			initLayout();
 			break;
 		case WM_HOTKEY:
 			dispatchCommand(hwnd, wParam);
 			break;
 		case WM_DESTROY:
 			unregisterHotkeys(hwnd);
+			disposeLayout();
 			PostQuitMessage(0);
 			return 0;
 	}
@@ -41,8 +44,7 @@ int CALLBACK WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance, LPSTR lpCmdLin
 	            WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 	            100, 100, 350, 250, NULL, NULL, hInstance, NULL);  
 
-	//TODO: hide window
-	ShowWindow(hwnd, nCmdShow);
+	ShowWindow(hwnd, SW_HIDE);
 	UpdateWindow(hwnd);				
 
 	while(GetMessage(&msg, NULL, 0, 0)) {

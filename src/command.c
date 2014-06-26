@@ -1,6 +1,7 @@
 #include <string.h>
 #include <windows.h>
 #include "command.h"
+#include "layout.h"
 
 #ifndef PARSE_COMMAND
 #define PARSE_COMMAND(c) if(0 == strcmp(raw, #c)) { return Command_##c; } 
@@ -30,12 +31,12 @@ static void MoveFocusRightImpl(HWND selfHwnd) {
 	MessageBox(NULL, TEXT("MoveFocusRightImpl"), TEXT("Debug"), MB_OK);
 }
 
-static void MoveWindowDownImpl(HWND selfHwnd) {
-	MessageBox(NULL, TEXT("MoveWindowDown"), TEXT("Debug"), MB_OK);
+static void MoveWindowDownImpl(HWND selfHwnd) {	
+	
 }
 
-static void MoveWindowUpImpl(HWND selfHwnd) {
-	MessageBox(NULL, TEXT("MoveWindowUpImpl"), TEXT("Debug"), MB_OK);
+static void MoveWindowUpImpl(HWND selfHwnd) {	
+	
 }
 
 static void MoveWindowLeftImpl(HWND selfHwnd) {
@@ -46,19 +47,37 @@ static void MoveWindowRightImpl(HWND selfHwnd) {
 	MessageBox(NULL, TEXT("MoveWindowRightImpl"), TEXT("Debug"), MB_OK);
 }
 
-static void MoveWindowToDesktopImpl(HWND selfHwnd) {
-	MessageBox(NULL, TEXT("MoveWindowToDesktopImpl"), TEXT("Debug"), MB_OK);
+
+static void MoveWindowToDesktop1Impl(HWND selfHwnd) {
+	moveWindowToDesktop(1);
+}
+static void MoveWindowToDesktop2Impl(HWND selfHwnd) {
+	moveWindowToDesktop(2);
+}
+static void MoveWindowToDesktop3Impl(HWND selfHwnd) {
+	moveWindowToDesktop(3);
+}
+static void MoveWindowToDesktop4Impl(HWND selfHwnd) {
+	moveWindowToDesktop(4);
 }
 
-static BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
-	char caption[256];
-	GetWindowText(hwnd, caption, 256);
-	MessageBox(NULL, caption, TEXT("Debug"), MB_OK);
-	return TRUE;
+
+static void GoToDesktop1Impl(HWND selfHwnd) {
+	goToDesktop(1);
 }
+static void GoToDesktop2Impl(HWND selfHwnd) {
+	goToDesktop(2);
+}
+static void GoToDesktop3Impl(HWND selfHwnd) {
+	goToDesktop(3);
+}
+static void GoToDesktop4Impl(HWND selfHwnd) {
+	goToDesktop(4);
+}
+
 
 static void EnumWindowsImpl(HWND selfHwnd) {
-	EnumWindows(EnumWindowsProc, 0);
+	listLayout();
 }
 
 static void UnknownImpl(HWND selfHwnd) {
@@ -75,7 +94,14 @@ Command parseCommand(char * raw) {
 	PARSE_COMMAND(MoveWindowUp)
 	PARSE_COMMAND(MoveWindowLeft)
 	PARSE_COMMAND(MoveWindowRight)
-	PARSE_COMMAND(MoveWindowToDesktop)
+	PARSE_COMMAND(MoveWindowToDesktop1)
+	PARSE_COMMAND(MoveWindowToDesktop2)
+	PARSE_COMMAND(MoveWindowToDesktop3)
+	PARSE_COMMAND(MoveWindowToDesktop4)
+	PARSE_COMMAND(GoToDesktop1)
+	PARSE_COMMAND(GoToDesktop2)
+	PARSE_COMMAND(GoToDesktop3)
+	PARSE_COMMAND(GoToDesktop4)
 	PARSE_COMMAND(EnumWindows)
 	return Command_Unknown;
 }
@@ -90,7 +116,14 @@ void dispatchCommand(HWND selfHwnd, Command cmd) {
 	DISPATCH_COMMAND(MoveWindowUp)
 	DISPATCH_COMMAND(MoveWindowLeft)
 	DISPATCH_COMMAND(MoveWindowRight)
-	DISPATCH_COMMAND(MoveWindowToDesktop)
+	DISPATCH_COMMAND(MoveWindowToDesktop1)
+	DISPATCH_COMMAND(MoveWindowToDesktop2)
+	DISPATCH_COMMAND(MoveWindowToDesktop3)
+	DISPATCH_COMMAND(MoveWindowToDesktop4)
+	DISPATCH_COMMAND(GoToDesktop1)
+	DISPATCH_COMMAND(GoToDesktop2)
+	DISPATCH_COMMAND(GoToDesktop3)
+	DISPATCH_COMMAND(GoToDesktop4)
 	DISPATCH_COMMAND(EnumWindows)
 	DISPATCH_COMMAND(Unknown)
 }

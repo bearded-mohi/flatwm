@@ -3,15 +3,20 @@ alt+k MoveFocusUp
 alt+h MoveFocusLeft
 alt+l MoveFocusRight
 
+alt+1 GoToDesktop1
+alt+2 GoToDesktop2
+alt+3 GoToDesktop3
+alt+4 GoToDesktop4
+
 alt+shift+j MoveWindowDown
 alt+shift+k MoveWindowUp
 alt+shift+h MoveWindowLeft
 alt+shift+l MoveWindowRight
 
-alt+shift+0 MoveWindowToDesktop
-alt+shift+9 MoveWindowToDesktop
-alt+shift+8 MoveWindowToDesktop
-alt+shift+7 MoveWindowToDesktop
+alt+shift+1 MoveWindowToDesktop1
+alt+shift+2 MoveWindowToDesktop2
+alt+shift+3 MoveWindowToDesktop3
+alt+shift+4 MoveWindowToDesktop4
 
 alt+w EnumWindows
 

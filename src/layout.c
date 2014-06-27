@@ -1,7 +1,12 @@
 #include <windows.h>
+#include <assert.h>
+
 #include "layout.h"
+#include "hook/hook.h"
 
 #define MAX_TILES_COUNT 1024
+
+static BOOL isWindowManagable(HWND hwnd);
 
 typedef struct Tile {
 	HWND hwnd;
@@ -31,6 +36,22 @@ static void disposeTile(Tile * tile) {
 	free(tile);
 }
 
+void insertTile(HWND hwnd) {		
+	if(_tilesCount < MAX_TILES_COUNT - 1) {
+		if(isWindowManagable(hwnd)) {
+			char title[256];
+			char className[256];
+			GetWindowText(hwnd, title, 256);
+			GetClassName(hwnd, className, 256);			
+			_tiles[_tilesCount++] = createTile(hwnd, className, title, _activeDesktop);
+		}		
+	}	
+}
+
+// static void deleteTile(HWND hwnd) {
+// 	// TODO: impl
+// }
+
 static BOOL isWindowManagable(HWND hwnd) {
 	TITLEBARINFO ti;
     HWND hwndTry, hwndWalk = NULL;
@@ -59,19 +80,9 @@ static BOOL isWindowManagable(HWND hwnd) {
     return TRUE;
 }
 
-static BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
-	char title[256];
-	char className[256];
-	GetWindowText(hwnd, title, 256);
-	GetClassName(hwnd, className, 256);
-	if(_tilesCount < MAX_TILES_COUNT - 1) {
-		if(isWindowManagable(hwnd)) {
-			_tiles[_tilesCount++] = createTile(hwnd, className, title, 1);
-		}
-		return TRUE;
-	} else {
-		return FALSE;
-	}
+static BOOL CALLBACK enumWindowsProc(HWND hwnd, LPARAM lParam) {
+	insertTile(hwnd);
+	return TRUE;
 }
 
 static void restoreAll() {
@@ -103,9 +114,18 @@ static void restoreSystemAnimations() {
 	} 		
 }
 
+// static void CALLBACK onCreateWindow(HWND hwnd) {
+
+// }
+
+// void CALLBACK onDestroyWindow(HWND hwnd) {
+
+// }
+
 void initLayout() {
+	// registerWindowHooks(insertTile, onDestroyWindow);
 	disableSystemAnimations();
-	EnumWindows(EnumWindowsProc, 0);
+	EnumWindows(enumWindowsProc, 0);
 }
 
 void listLayout() {
@@ -150,6 +170,7 @@ void goToDesktop(int n) {
 }
 
 void disposeLayout() {
+	// unregisterWindowHooks();
 	restoreSystemAnimations();
 	restoreAll();
 	for(int i = 0; i < _tilesCount; i++) {

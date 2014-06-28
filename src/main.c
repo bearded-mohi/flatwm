@@ -5,6 +5,7 @@
 #include "config.h"
 #include "command.h"
 #include "layout.h"
+#include "hook/hook.h"
 
 static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
@@ -14,13 +15,18 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 			//TODO: write default config to disk if no config supplied
 			log_init("_log");
 			read_config("_flatwmrc");
+			register_window_hooks(hwnd);
 			register_hotkeys(hwnd);
 			init_layout();
+			break;
+		case SOME_WINDOW_CREATED:
+			log_print("some window created!");
 			break;
 		case WM_HOTKEY:
 			dispatch_command(hwnd, wParam);
 			break;
 		case WM_DESTROY:
+			unregister_window_hooks();
 			unregister_hotkeys(hwnd);
 			dispose_layout();
 			log_dispose();

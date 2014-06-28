@@ -3,7 +3,6 @@
 
 #include "log.h"
 #include "layout.h"
-#include "hook/hook.h"
 
 #define MAX_TILES_COUNT 1024
 
@@ -112,8 +111,7 @@ static BOOL CALLBACK enum_windows_proc(HWND hwnd, LPARAM lParam) {
 	return TRUE;
 }
 
-void init_layout() {
-	// registerWindowHooks(insertTile, onDestroyWindow);
+void init_layout() {	
 	disable_system_animations();
 	EnumWindows(enum_windows_proc, 0);
 }
@@ -163,7 +161,6 @@ void go_to_desktop(int n) {
 }
 
 void dispose_layout() {
-	// unregisterWindowHooks();
 	restore_system_animations();
 	show_all_windows();
 	for (int i = 0; i < _tiles_count; i++) {

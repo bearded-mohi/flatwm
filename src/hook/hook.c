@@ -10,9 +10,9 @@ static LRESULT CALLBACK hook_proc(int nCode, WPARAM wParam, LPARAM lParam) {
 	// } else if(HSHELL_WINDOWDESTROYED == nCode) {
 	// 	_onDestroyWindow((HWND)wParam);
 	// }
-    LPCBT_CREATEWND cs;
+    
     if (HCBT_CREATEWND == nCode) {
-        cs = (LPCBT_CREATEWND)lParam;
+        LPCBT_CREATEWND cs = (LPCBT_CREATEWND) lParam;
         if (0 == cs->lpcs->hwndParent) {
             // _onCreateWindow((HWND)wParam);
         }

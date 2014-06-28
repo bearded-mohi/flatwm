@@ -48,13 +48,12 @@ void read_config(const char *filename) {
 	if (config) {
 		char raw_key[256];
 		char raw_cmd[256];
-		while (EOF != (fscanf(config, "%s %s", raw_key, raw_cmd))) {
+		while (EOF != (fscanf(config, "%255s %255s", raw_key, raw_cmd))) {
 			if (_bindings_count < MAX_BINDINGS - 1) {
 				_bindings[_bindings_count++] = parse_hotkey(raw_key, raw_cmd);	
 			} else {
 				// TODO: something
-			}
-			
+			}			
 		}
 		fclose(config);
 	}

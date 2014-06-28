@@ -1,8 +1,15 @@
 P=flatwm.exe
 CFG=_flatwmrc
 CC=gcc
-CFLAGS = -g -Wall -m64 -std=c11 -mwindows
+CFLAGS = -std=c11 -Wall -g -mwindows
 BUILD_DIR=build
+
+ifeq ($(PROCESSOR_ARCHITECTURE),x86)
+	CFLAGS += -m32
+endif
+ifeq ($(PROCESSOR_ARCHITECTURE),x64)
+	CFLAGS += -m64
+endif
 
 all: exe
 

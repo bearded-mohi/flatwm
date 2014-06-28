@@ -1,8 +1,8 @@
-#ifndef _CONFIG_H_
-#define _CONFIG_H_
+#ifndef CONFIG_H
+#define CONFIG_H
 
-void readConfig(const char * filename);
-void registerHotkeys();
-void unregisterHotkeys();
+void read_config(const char *filename);
+void register_hotkeys();
+void unregister_hotkeys();
 
 #endif

@@ -1,8 +1,7 @@
-#ifndef _HOOK_H_
-#define _HOOK_H_
+#ifndef HOOK_H
+#define HOOK_H
 
-void registerWindowHooks(void (*onCreateWindow)(HWND hwnd), void(*onDestroyWindow)(HWND hwnd));
-
-void unregisterWindowHooks();
+void register_window_hooks();
+void unregister_window_hooks();
 
 #endif

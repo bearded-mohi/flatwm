@@ -1,5 +1,5 @@
-#ifndef _COMMAND_H_
-#define _COMMAND_H_
+#ifndef COMMAND_H
+#define COMMAND_H
 
 typedef enum {
 	Command_Quit,
@@ -23,7 +23,7 @@ typedef enum {
 	Command_Unknown
 } Command;
 
-Command parseCommand(char * raw);
-void dispatchCommand(HWND selfHwnd, Command cmd);
+Command parse_command(char *raw);
+void dispatch_command(HWND selfHwnd, Command cmd);
 
 #endif

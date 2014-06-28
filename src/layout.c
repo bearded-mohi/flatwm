@@ -6,55 +6,52 @@
 
 #define MAX_TILES_COUNT 1024
 
-static BOOL isWindowManagable(HWND hwnd);
+static BOOL is_window_managable(HWND hwnd);
 
 typedef struct Tile {
 	HWND hwnd;
-	char * className;
-	char * title;
+	char *class_name;
+	char *caption;
 	int desktop;
 } Tile;
 
-static Tile * _tiles[MAX_TILES_COUNT];
-static int _tilesCount = 0;
-static int _activeDesktop = 1;
+static Tile *_tiles[MAX_TILES_COUNT];
+static int _tiles_count = 0;
+static int _active_desktop = 1;
 
-static Tile * createTile(HWND hwnd, const char * className, const char * title, int desktop) {
-	Tile * t = malloc(sizeof(Tile));	
+static Tile* create_tile(HWND hwnd, const char *class_name, const char *caption, int desktop) {
+	Tile *t = malloc(sizeof(Tile));	
 	t->hwnd = hwnd;
-	t->className = malloc(strlen(className) + 1);
-	strcpy(t->className, className);
-	t->title = malloc(strlen(title) + 1);	
-	strcpy(t->title, title);
+	t->class_name = malloc(strlen(class_name) + 1);
+	strcpy(t->class_name, class_name);
+	t->caption = malloc(strlen(caption) + 1);	
+	strcpy(t->caption, caption);
 	t->desktop = desktop;
 	return t;
 }
 
-static void disposeTile(Tile * tile) {
-	free(tile->className);
-	free(tile->title);
+static void dispose_tile(Tile *tile) {
+	free(tile->class_name);
+	free(tile->caption);
 	free(tile);
 }
 
-void insertTile(HWND hwnd) {		
-	if(_tilesCount < MAX_TILES_COUNT - 1) {
-		if(isWindowManagable(hwnd)) {
-			char title[256];
-			char className[256];
-			GetWindowText(hwnd, title, 256);
-			GetClassName(hwnd, className, 256);			
-			_tiles[_tilesCount++] = createTile(hwnd, className, title, _activeDesktop);
+void insert_tile(HWND hwnd) {		
+	if (_tiles_count < MAX_TILES_COUNT - 1) {
+		if (is_window_managable(hwnd)) {
+			char caption[256];
+			char class_name[256];
+			GetWindowText(hwnd, caption, 256);
+			GetClassName(hwnd, class_name, 256);			
+			_tiles[_tiles_count++] = create_tile(hwnd, class_name, caption, _active_desktop);
 		}		
 	}	
 }
 
-// static void deleteTile(HWND hwnd) {
-// 	// TODO: impl
-// }
-
-static BOOL isWindowManagable(HWND hwnd) {
+static BOOL is_window_managable(HWND hwnd) {
 	TITLEBARINFO ti;
-    HWND hwndTry, hwndWalk = NULL;
+    HWND hwndTry = NULL;
+    HWND hwndWalk = NULL;
     if(!IsWindowVisible(hwnd)) {
         return FALSE;
     }
@@ -71,98 +68,92 @@ static BOOL isWindowManagable(HWND hwnd) {
     }    
     ti.cbSize = sizeof(ti);
     GetTitleBarInfo(hwnd, &ti);
-    if(ti.rgstate[0] & STATE_SYSTEM_INVISIBLE) {
-        return FALSE;
-    }
+    // if(ti.rgstate[0] & STATE_SYSTEM_INVISIBLE) {
+    //     return FALSE;
+    // }
     if(GetWindowLong(hwnd, GWL_EXSTYLE) & WS_EX_TOOLWINDOW) {
         return FALSE;
     }
     return TRUE;
 }
 
-static BOOL CALLBACK enumWindowsProc(HWND hwnd, LPARAM lParam) {
-	insertTile(hwnd);
-	return TRUE;
-}
-
-static void restoreAll() {
-	for(int i = 0; i < _tilesCount; i++) {
+static void show_all_windows() {
+	for (int i = 0; i < _tiles_count; i++) {
 		ShowWindow(_tiles[i]->hwnd, SW_SHOW);
 	}
 }
 
 
-static BOOL _systemAnimations;
-static void disableSystemAnimations() {
+static BOOL _system_animations;
+static void disable_system_animations() {
 	ANIMATIONINFO ai;
 	ai.cbSize = sizeof(ANIMATIONINFO); 
 	SystemParametersInfo(SPI_GETANIMATION, sizeof(ANIMATIONINFO), &ai, 0); 
-	_systemAnimations = ai.iMinAnimate; 
+	_system_animations = ai.iMinAnimate; 
 
-	if(_systemAnimations) { 
-	ai.iMinAnimate = FALSE; 
+	if (_system_animations) { 
+		ai.iMinAnimate = FALSE; 
 		SystemParametersInfo(SPI_SETANIMATION, sizeof(ANIMATIONINFO), &ai, 0); 
 	} 	
 }
 
-static void restoreSystemAnimations() {
+static void restore_system_animations() {
 	ANIMATIONINFO ai;
 	ai.cbSize = sizeof(ANIMATIONINFO); 
-	if(_systemAnimations) { 
-	ai.iMinAnimate = TRUE; 
+	if (_system_animations) { 
+		ai.iMinAnimate = TRUE; 
 		SystemParametersInfo(SPI_SETANIMATION, sizeof(ANIMATIONINFO), &ai, 0); 
 	} 		
 }
 
-// static void CALLBACK onCreateWindow(HWND hwnd) {
+static BOOL CALLBACK enum_windows_proc(HWND hwnd, LPARAM lParam) {
+	insert_tile(hwnd);
+	return TRUE;
+}
 
-// }
-
-// void CALLBACK onDestroyWindow(HWND hwnd) {
-
-// }
-
-void initLayout() {
+void init_layout() {
 	// registerWindowHooks(insertTile, onDestroyWindow);
-	disableSystemAnimations();
-	EnumWindows(enumWindowsProc, 0);
+	disable_system_animations();
+	EnumWindows(enum_windows_proc, 0);
 }
 
-void listLayout() {
-	size_t totalLen = 0;	
-	for(int i = 0; i < _tilesCount; i++) {
-		totalLen += strlen(_tiles[i]->className) + 1;
-		totalLen += strlen(_tiles[i]->title) + 1;
+void list_layout() {
+	size_t total_len = 0;	
+	for (int i = 0; i < _tiles_count; i++) {
+		total_len += strlen(_tiles[i]->class_name) + 1;
+		total_len += strlen(_tiles[i]->caption) + 1;
 	}
-	char * totalList = malloc(totalLen + 1);
-	memset(totalList, '\0', totalLen);
-	for(int i = 0; i < _tilesCount; i++) {
-		strcat(totalList, _tiles[i]->className);
-		strcat(totalList, "-");
-		strcat(totalList, _tiles[i]->title);
-		strcat(totalList, "\n");
+	char *total_list = malloc(total_len + 1);
+	memset(total_list, '\0', total_len);
+	for (int i = 0; i < _tiles_count; i++) {
+		strcat(total_list, _tiles[i]->class_name);
+		strcat(total_list, "-");
+		strcat(total_list, _tiles[i]->caption);
+		strcat(total_list, "\n");
 	}
-	MessageBox(NULL, totalList, "tiles list", MB_OK);
-	free(totalList);
+	MessageBox(NULL, total_list, "tiles list", MB_OK);
+	free(total_list);
 }
 
-void moveWindowToDesktop(int n) {
+void move_window_to_desktop(int n) {
+	if (n == _active_desktop) return;
+
 	HWND foreground = GetForegroundWindow();
-	for(int i = 0; i < _tilesCount; i++) {
-		if(_tiles[i]->hwnd == foreground) {
+	for (int i = 0; i < _tiles_count; i++) {
+		if (_tiles[i]->hwnd == foreground) {			
 			_tiles[i]->desktop = n;
-			if(_activeDesktop != n) {
-				ShowWindow(_tiles[i]->hwnd, SW_HIDE);
-			}
-			break;
+			ShowWindow(_tiles[i]->hwnd, SW_HIDE);
+			break;		
 		} 
 	}
 }
 
-void goToDesktop(int n) {
-	_activeDesktop = n;
-	for(int i = 0; i < _tilesCount; i++) {
-		if(_tiles[i]->desktop == _activeDesktop) {
+void go_to_desktop(int n) {
+	if (n == _active_desktop) return;
+
+	_active_desktop = n;
+	for (int i = 0; i < _tiles_count; i++) {
+		if (_tiles[i]->desktop == _active_desktop) {
 			ShowWindow(_tiles[i]->hwnd, SW_SHOWNA);
 		} else {
 			ShowWindow(_tiles[i]->hwnd, SW_HIDE);
@@ -170,12 +161,12 @@ void goToDesktop(int n) {
 	}
 }
 
-void disposeLayout() {
+void dispose_layout() {
 	// unregisterWindowHooks();
-	restoreSystemAnimations();
-	restoreAll();
-	for(int i = 0; i < _tilesCount; i++) {
-		disposeTile(_tiles[i]);
+	restore_system_animations();
+	show_all_windows();
+	for (int i = 0; i < _tiles_count; i++) {
+		dispose_tile(_tiles[i]);
 	}
-	_tilesCount = 0;
+	_tiles_count = 0;
 }

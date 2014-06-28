@@ -1,10 +1,10 @@
-#ifndef _LAYOUT_H_
-#define _LAYOUT_H_
+#ifndef LAYOUT_H
+#define LAYOUT_H
 
-void initLayout();
-void listLayout();
-void goToDesktop(int n);
-void moveWindowToDesktop(int n);
-void disposeLayout();
+void init_layout();
+void list_layout();
+void go_to_desktop(int n);
+void move_window_to_desktop(int n);
+void dispose_layout();
 
 #endif

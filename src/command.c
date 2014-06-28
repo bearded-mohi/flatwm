@@ -1,15 +1,12 @@
 #include <string.h>
 #include <windows.h>
+
 #include "command.h"
 #include "layout.h"
 
-#ifndef PARSE_COMMAND
-#define PARSE_COMMAND(c) if(0 == strcmp(raw, #c)) { return Command_##c; } 
-#endif
+#define PARSE_COMMAND(c) if (0 == strcmp(raw, #c)) { return Command_##c; } 
 
-#ifndef DISPATCH_COMMAND
-#define DISPATCH_COMMAND(c) if(Command_##c == cmd) { c##Impl(selfHwnd); }
-#endif
+#define DISPATCH_COMMAND(c) if (Command_##c == cmd) { c##Impl(selfHwnd); }
 
 static void QuitImpl(HWND selfHwnd) {
 	SendMessage(selfHwnd, WM_DESTROY, 0, 0);
@@ -49,42 +46,42 @@ static void MoveWindowRightImpl(HWND selfHwnd) {
 
 
 static void MoveWindowToDesktop1Impl(HWND selfHwnd) {
-	moveWindowToDesktop(1);
+	move_window_to_desktop(1);
 }
 static void MoveWindowToDesktop2Impl(HWND selfHwnd) {
-	moveWindowToDesktop(2);
+	move_window_to_desktop(2);
 }
 static void MoveWindowToDesktop3Impl(HWND selfHwnd) {
-	moveWindowToDesktop(3);
+	move_window_to_desktop(3);
 }
 static void MoveWindowToDesktop4Impl(HWND selfHwnd) {
-	moveWindowToDesktop(4);
+	move_window_to_desktop(4);
 }
 
 
 static void GoToDesktop1Impl(HWND selfHwnd) {
-	goToDesktop(1);
+	go_to_desktop(1);
 }
 static void GoToDesktop2Impl(HWND selfHwnd) {
-	goToDesktop(2);
+	go_to_desktop(2);
 }
 static void GoToDesktop3Impl(HWND selfHwnd) {
-	goToDesktop(3);
+	go_to_desktop(3);
 }
 static void GoToDesktop4Impl(HWND selfHwnd) {
-	goToDesktop(4);
+	go_to_desktop(4);
 }
 
 
 static void EnumWindowsImpl(HWND selfHwnd) {
-	listLayout();
+	list_layout();
 }
 
 static void UnknownImpl(HWND selfHwnd) {
 	MessageBox(NULL, TEXT("WAT??"), TEXT("Debug"), MB_OK);
 }
 
-Command parseCommand(char * raw) {
+Command parse_command(char * raw) {
 	PARSE_COMMAND(Quit)
 	PARSE_COMMAND(MoveFocusDown)
 	PARSE_COMMAND(MoveFocusUp)
@@ -106,7 +103,7 @@ Command parseCommand(char * raw) {
 	return Command_Unknown;
 }
 
-void dispatchCommand(HWND selfHwnd, Command cmd) {
+void dispatch_command(HWND selfHwnd, Command cmd) {
 	DISPATCH_COMMAND(Quit)
 	DISPATCH_COMMAND(MoveFocusDown)
 	DISPATCH_COMMAND(MoveFocusUp)

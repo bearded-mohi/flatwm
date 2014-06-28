@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <assert.h>
 
+#include "log.h"
 #include "config.h"
 #include "command.h"
 #include "layout.h"
@@ -11,6 +12,7 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 			//TODO: read config path from command line arg
 			//TODO: make default config in code
 			//TODO: write default config to disk if no config supplied
+			log_init("_log");
 			read_config("_flatwmrc");
 			register_hotkeys(hwnd);
 			init_layout();
@@ -21,6 +23,7 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 		case WM_DESTROY:
 			unregister_hotkeys(hwnd);
 			dispose_layout();
+			log_dispose();
 			PostQuitMessage(0);
 			return 0;
 	}

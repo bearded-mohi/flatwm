@@ -123,6 +123,7 @@ void listLayout() {
 		strcat(totalList, "\n");
 	}
 	MessageBox(NULL, totalList, "tiles list", MB_OK);
+	free(totalList);
 }
 
 void moveWindowToDesktop(int n) {

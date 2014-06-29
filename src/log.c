@@ -8,13 +8,13 @@ static FILE *_file;
 void log_init(char const *filename) {
 	if (!_file) {
 		_file = fopen(filename, "a+");
-		log_print("Application started");
+		log_print("===== Application started =====");
 	}
 }
 
 void log_dispose() {
 	if (_file) {
-		log_print("Application closed");
+		log_print("===== Application closed =====");
 		fclose(_file);
 	}
 }

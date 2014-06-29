@@ -4,34 +4,49 @@
 #include "hook.h"
 
 #define SHARED __attribute__((section(".shr"), shared))
+#define UNSHARED
 
-static HHOOK _shell_hook           = NULL;
-static HWND  _callback_hwnd SHARED = NULL;
+// #define CBT_HOOK
+#define SHELL_HOOK
+
+static HHOOK _shell_hook    UNSHARED = NULL;
+static HWND  _callback_hwnd SHARED   = NULL;
 
 static LRESULT CALLBACK hook_proc(int nCode, WPARAM wParam, LPARAM lParam) {
-	// if(HSHELL_WINDOWCREATED == nCode) {
- //        Beep( 750, 300 );
-	// 	_onCreateWindow((HWND)wParam);
-	// } else if(HSHELL_WINDOWDESTROYED == nCode) {
-	// 	_onDestroyWindow((HWND)wParam);
-	// }
     
+    #ifdef SHELL_HOOK
+	if (HSHELL_WINDOWCREATED == nCode) {
+        PostMessage(_callback_hwnd, SOME_WINDOW_CREATED, wParam, 0);
+	} else if (HSHELL_WINDOWDESTROYED == nCode) {
+        PostMessage(_callback_hwnd, SOME_WINDOW_DESTROYED, wParam, 0);
+	}
+    #endif
+
+    #ifdef CBT_HOOK
     if (HCBT_CREATEWND == nCode) {
         LPCBT_CREATEWND cs = (LPCBT_CREATEWND) lParam;
         if (0 == cs->lpcs->hwndParent) {
             PostMessage(_callback_hwnd, SOME_WINDOW_CREATED, wParam, 0);
         }
     } else if (HCBT_DESTROYWND == nCode) {                
-        //_onDestroyWindow((HWND)wParam);   
+        PostMessage(_callback_hwnd, SOME_WINDOW_DESTROYED, wParam, 0);   
     }
+    #endif
+
 	return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
 
 void register_window_hooks(HWND callback_hwnd) {
 	if (!_shell_hook) {  
         _callback_hwnd = callback_hwnd;   
-		// _shellHook = SetWindowsHookEx(WH_SHELL, _hookProc, GetModuleHandle("hook"), 0);
+		
+        #ifdef SHELL_HOOK
+        _shell_hook = SetWindowsHookEx(WH_SHELL, hook_proc, GetModuleHandle("hook"), 0);
+        #endif
+
+        #ifdef CBT_HOOK
         _shell_hook = SetWindowsHookEx(WH_CBT, hook_proc, GetModuleHandle("hook"), 0);
+        #endif
 	}
 }
 

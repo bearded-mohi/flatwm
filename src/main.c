@@ -7,6 +7,29 @@
 #include "layout.h"
 #include "hook/hook.h"
 
+static BOOL _system_animations;
+
+static void disable_system_animations() {
+	ANIMATIONINFO ai;
+	ai.cbSize = sizeof(ANIMATIONINFO); 
+	SystemParametersInfo(SPI_GETANIMATION, sizeof(ANIMATIONINFO), &ai, 0); 
+	_system_animations = ai.iMinAnimate; 
+
+	if (_system_animations) { 
+		ai.iMinAnimate = FALSE; 
+		SystemParametersInfo(SPI_SETANIMATION, sizeof(ANIMATIONINFO), &ai, 0); 
+	} 	
+}
+
+static void restore_system_animations() {
+	ANIMATIONINFO ai;
+	ai.cbSize = sizeof(ANIMATIONINFO); 
+	if (_system_animations) { 
+		ai.iMinAnimate = TRUE; 
+		SystemParametersInfo(SPI_SETANIMATION, sizeof(ANIMATIONINFO), &ai, 0); 
+	} 		
+}
+
 static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 		case WM_CREATE:
@@ -17,17 +40,24 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 			read_config("_flatwmrc");
 			register_window_hooks(hwnd);
 			register_hotkeys(hwnd);
+			disable_system_animations();
 			init_layout();
 			break;
 		case SOME_WINDOW_CREATED:
+			insert_tile((HWND) wParam);
 			log_print("some window created!");
+			break;
+		case SOME_WINDOW_DESTROYED:
+			//TODO: remove tile from layout
+			log_print("window destroyed");
 			break;
 		case WM_HOTKEY:
 			dispatch_command(hwnd, wParam);
 			break;
 		case WM_DESTROY:
 			unregister_window_hooks();
-			unregister_hotkeys(hwnd);
+			unregister_hotkeys(hwnd);			
+			restore_system_animations();
 			dispose_layout();
 			log_dispose();
 			PostQuitMessage(0);

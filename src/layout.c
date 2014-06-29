@@ -36,15 +36,26 @@ static void dispose_tile(Tile *tile) {
 	free(tile);
 }
 
+static BOOL has_tile(HWND hwnd) {
+	for (int i = 0; i < _tiles_count; i++) {
+		if (_tiles[i]->hwnd == hwnd) {
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 void insert_tile(HWND hwnd) {		
 	if (_tiles_count < MAX_TILES_COUNT - 1) {
-		if (is_window_managable(hwnd)) {
+		if (!has_tile(hwnd) && is_window_managable(hwnd)) {
 			char caption[256];
 			char class_name[256];
 			GetWindowText(hwnd, caption, 256);
 			GetClassName(hwnd, class_name, 256);			
 			_tiles[_tiles_count++] = create_tile(hwnd, class_name, caption, _active_desktop);
 		}		
+	} else {
+		log_print("MAX_TILES_COUNT exited. its time to use linked list");
 	}	
 }
 
@@ -83,37 +94,9 @@ static void show_all_windows() {
 	}
 }
 
-
-static BOOL _system_animations;
-static void disable_system_animations() {
-	ANIMATIONINFO ai;
-	ai.cbSize = sizeof(ANIMATIONINFO); 
-	SystemParametersInfo(SPI_GETANIMATION, sizeof(ANIMATIONINFO), &ai, 0); 
-	_system_animations = ai.iMinAnimate; 
-
-	if (_system_animations) { 
-		ai.iMinAnimate = FALSE; 
-		SystemParametersInfo(SPI_SETANIMATION, sizeof(ANIMATIONINFO), &ai, 0); 
-	} 	
-}
-
-static void restore_system_animations() {
-	ANIMATIONINFO ai;
-	ai.cbSize = sizeof(ANIMATIONINFO); 
-	if (_system_animations) { 
-		ai.iMinAnimate = TRUE; 
-		SystemParametersInfo(SPI_SETANIMATION, sizeof(ANIMATIONINFO), &ai, 0); 
-	} 		
-}
-
 static BOOL CALLBACK enum_windows_proc(HWND hwnd, LPARAM lParam) {
 	insert_tile(hwnd);
 	return TRUE;
-}
-
-void init_layout() {	
-	disable_system_animations();
-	EnumWindows(enum_windows_proc, 0);
 }
 
 void list_layout() {
@@ -160,8 +143,11 @@ void go_to_desktop(int n) {
 	}
 }
 
-void dispose_layout() {
-	restore_system_animations();
+void init_layout() {	
+	EnumWindows(enum_windows_proc, 0);
+}
+
+void dispose_layout() {	
 	show_all_windows();
 	for (int i = 0; i < _tiles_count; i++) {
 		dispose_tile(_tiles[i]);

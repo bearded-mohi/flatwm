@@ -47,6 +47,7 @@ static BOOL has_tile(HWND hwnd) {
 
 void insert_tile(HWND hwnd) {		
 	if (_tiles_count < MAX_TILES_COUNT - 1) {
+		//TODO: exclude is_window_managable in separete filter
 		if (!has_tile(hwnd) && is_window_managable(hwnd)) {
 			char caption[256];
 			char class_name[256];
@@ -79,6 +80,7 @@ static BOOL is_window_managable(HWND hwnd) {
     }    
     ti.cbSize = sizeof(ti);
     GetTitleBarInfo(hwnd, &ti);
+    //TODO: why STATE_SYSTEM_INVISIBLE is undefined for winxp?
     // if(ti.rgstate[0] & STATE_SYSTEM_INVISIBLE) {
     //     return FALSE;
     // }
@@ -144,6 +146,7 @@ void go_to_desktop(int n) {
 }
 
 void init_layout() {	
+	//TODO: exclude it to separete event source
 	EnumWindows(enum_windows_proc, 0);
 }
 

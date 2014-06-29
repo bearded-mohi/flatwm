@@ -1,5 +1,6 @@
-#include <windows.h>
+#include <stdio.h>
 #include <assert.h>
+#include <windows.h>
 
 #include "log.h"
 #include "layout.h"
@@ -108,12 +109,8 @@ void list_layout() {
 		total_len += strlen(_tiles[i]->caption) + 1;
 	}
 	char *total_list = malloc(total_len + 1);
-	memset(total_list, '\0', total_len);
-	for (int i = 0; i < _tiles_count; i++) {
-		strcat(total_list, _tiles[i]->class_name);
-		strcat(total_list, "-");
-		strcat(total_list, _tiles[i]->caption);
-		strcat(total_list, "\n");
+	for (int i = 0, pos = 0; i < _tiles_count; i++) {
+		pos += snprintf(total_list + pos, total_len, "%s-%s\n", _tiles[i]->class_name, _tiles[i]->caption);
 	}
 	MessageBox(NULL, total_list, "tiles list", MB_OK);
 	free(total_list);

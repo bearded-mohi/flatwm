@@ -31,5 +31,5 @@ void log_print(char const *fmt, ...) {
 }
 
 void log_last_error() {
-
+	//TODO: impl
 }

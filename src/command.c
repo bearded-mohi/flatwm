@@ -74,7 +74,7 @@ static void GoToDesktop4Impl(HWND selfHwnd) {
 
 
 static void EnumWindowsImpl(HWND selfHwnd) {
-	list_layout();
+	layout_list();
 }
 
 static void UnknownImpl(HWND selfHwnd) {

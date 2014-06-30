@@ -41,14 +41,14 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 			register_window_hooks(hwnd);
 			register_hotkeys(hwnd);
 			disable_system_animations();
-			init_layout();
+			layout_init();
 			break;
 		case SOME_WINDOW_CREATED:
-			insert_tile((HWND) wParam);
+			layout_track((HWND) wParam);
 			log_print("some window created!");
 			break;
 		case SOME_WINDOW_DESTROYED:
-			//TODO: remove tile from layout
+			layout_untrack((HWND) wParam);
 			log_print("window destroyed");
 			break;
 		case WM_HOTKEY:
@@ -58,7 +58,7 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 			unregister_window_hooks();
 			unregister_hotkeys(hwnd);			
 			restore_system_animations();
-			dispose_layout();
+			layout_dispose();
 			log_dispose();
 			PostQuitMessage(0);
 			return 0;

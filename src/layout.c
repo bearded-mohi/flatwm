@@ -1,26 +1,93 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include <assert.h>
 #include <windows.h>
 
 #include "log.h"
 #include "layout.h"
 
-#define MAX_TILES_COUNT 1024
-
-static BOOL is_window_managable(HWND hwnd);
+#define foreach_tile(t, ...) { \
+	tile_item_s *it = _tiles->head; \
+	while (NULL != it) { \
+		Tile *t = it->item; \
+		__VA_ARGS__; \
+		it = it->next; \
+	} \
+}
 
 typedef struct Tile {
-	HWND hwnd;
+	HWND  hwnd;
 	char *class_name;
 	char *caption;
-	int desktop;
+	int   desktop;
 } Tile;
 
-static Tile *_tiles[MAX_TILES_COUNT];
-static int _tiles_count = 0;
+static BOOL is_window_managable(HWND hwnd);
+static void tile_dispose(Tile *tile);
+
+typedef struct tile_item_s {
+	Tile               *item;
+	struct tile_item_s *next;
+} tile_item_s;
+
+typedef struct tile_list_s {
+	tile_item_s *head;
+	tile_item_s *tail;
+} tile_list_s;
+
+tile_list_s *list_create() {
+	tile_list_s *self = malloc(sizeof(tile_list_s));
+	self->head = NULL;
+	self->tail = NULL;
+	return self;
+}
+
+void list_dispose(tile_list_s *self) {
+	tile_item_s *cur = self->head;
+	while (NULL != self->head) {				
+		cur = self->head;
+		self->head = self->head->next;
+		free(cur);
+	}
+	free(self);
+}
+
+void list_add(tile_list_s *self, Tile *tile) {
+	tile_item_s *new_item = malloc(sizeof(tile_item_s));
+	new_item->next = NULL;
+	new_item->item = tile;
+	if (NULL == self->head) {
+		self->head = new_item;
+		self->tail = new_item;
+	} else {
+		self->tail->next = new_item;
+		self->tail = new_item;
+	}	
+}
+
+void list_remove(tile_list_s *self, HWND hwnd) {
+	tile_item_s *cur = self->head;
+	tile_item_s *prev = NULL;
+	while (NULL != cur) {
+		if (cur->item->hwnd == hwnd) {
+			if (NULL == prev) {
+				self->head = cur->next;
+				tile_dispose(cur->item);
+			} else {
+				prev->next = cur->next;
+				tile_dispose(cur->item);
+			}
+		}
+		prev = cur;
+		cur = cur->next;
+	}
+}
+
+static tile_list_s *_tiles;
+
 static int _active_desktop = 1;
 
-static Tile* create_tile(HWND hwnd, const char *class_name, const char *caption, int desktop) {
+static Tile* tile_create(HWND hwnd, const char *class_name, const char *caption, int desktop) {
 	Tile *t = malloc(sizeof(Tile));	
 	t->hwnd = hwnd;
 	t->class_name = malloc(strlen(class_name) + 1);
@@ -31,34 +98,32 @@ static Tile* create_tile(HWND hwnd, const char *class_name, const char *caption,
 	return t;
 }
 
-static void dispose_tile(Tile *tile) {
+static void tile_dispose(Tile *tile) {
 	free(tile->class_name);
 	free(tile->caption);
 	free(tile);
 }
 
-static BOOL has_tile(HWND hwnd) {
-	for (int i = 0; i < _tiles_count; i++) {
-		if (_tiles[i]->hwnd == hwnd) {
-			return TRUE;
-		}
-	}
-	return FALSE;
+static bool has_tile(HWND hwnd) {
+	foreach_tile(t,
+		if (t->hwnd == hwnd) return true;
+	);
+	return false;
 }
 
-void insert_tile(HWND hwnd) {		
-	if (_tiles_count < MAX_TILES_COUNT - 1) {
-		//TODO: exclude is_window_managable in separete filter
-		if (!has_tile(hwnd) && is_window_managable(hwnd)) {
-			char caption[256];
-			char class_name[256];
-			GetWindowText(hwnd, caption, 256);
-			GetClassName(hwnd, class_name, 256);			
-			_tiles[_tiles_count++] = create_tile(hwnd, class_name, caption, _active_desktop);
-		}		
-	} else {
-		log_print("MAX_TILES_COUNT exited. its time to use linked list");
-	}	
+void layout_track(HWND hwnd) {		
+	//TODO: exclude is_window_managable in separete filter
+	if (!has_tile(hwnd) && is_window_managable(hwnd)) {
+		char caption[256];
+		char class_name[256];
+		GetWindowText(hwnd, caption, 256);
+		GetClassName(hwnd, class_name, 256);			
+		list_add(_tiles, tile_create(hwnd, class_name, caption, _active_desktop));
+	}			
+}
+
+void layout_untrack(HWND hwnd) {
+	// list_remove(_tiles, hwnd);
 }
 
 static BOOL is_window_managable(HWND hwnd) {
@@ -92,26 +157,35 @@ static BOOL is_window_managable(HWND hwnd) {
 }
 
 static void show_all_windows() {
-	for (int i = 0; i < _tiles_count; i++) {
-		ShowWindow(_tiles[i]->hwnd, SW_SHOW);
-	}
+	foreach_tile(t,
+		ShowWindow(t->hwnd, SW_SHOW);
+	)
 }
 
 static BOOL CALLBACK enum_windows_proc(HWND hwnd, LPARAM lParam) {
-	insert_tile(hwnd);
+	layout_track(hwnd);
 	return TRUE;
 }
 
-void list_layout() {
+void layout_list() {
 	size_t total_len = 0;	
-	for (int i = 0; i < _tiles_count; i++) {
-		total_len += strlen(_tiles[i]->class_name) + 1;
-		total_len += strlen(_tiles[i]->caption) + 1;
-	}
+	foreach_tile(t,
+		total_len += strlen(t->class_name) + 1;
+		total_len += strlen(t->caption) + 1;
+	);
+	
 	char *total_list = malloc(total_len + 1);
-	for (int i = 0, pos = 0; i < _tiles_count; i++) {
-		pos += snprintf(total_list + pos, total_len, "%s-%s\n", _tiles[i]->class_name, _tiles[i]->caption);
-	}
+	int pos = 0;
+	int res = 0;
+	foreach_tile(t,
+		res = snprintf(total_list + pos, total_len, "%s-%s\n", t->class_name, t->caption);
+		if (0 <= res) {
+			pos += res;
+		} else {
+			log_print("snprintf return error");
+		}
+	);
+
 	MessageBox(NULL, total_list, "tiles list", MB_OK);
 	free(total_list);
 }
@@ -120,37 +194,35 @@ void move_window_to_desktop(int n) {
 	if (n == _active_desktop) return;
 
 	HWND foreground = GetForegroundWindow();
-	for (int i = 0; i < _tiles_count; i++) {
-		if (_tiles[i]->hwnd == foreground) {			
-			_tiles[i]->desktop = n;
-			ShowWindow(_tiles[i]->hwnd, SW_HIDE);
-			break;		
-		} 
-	}
+	foreach_tile(t,
+		if (t->hwnd == foreground) {
+			t->desktop = n;
+			ShowWindow(t->hwnd, SW_HIDE);
+			break;
+		}
+	);
 }
 
 void go_to_desktop(int n) {
 	if (n == _active_desktop) return;
 
 	_active_desktop = n;
-	for (int i = 0; i < _tiles_count; i++) {
-		if (_tiles[i]->desktop == _active_desktop) {
-			ShowWindow(_tiles[i]->hwnd, SW_SHOWNA);
-		} else {
-			ShowWindow(_tiles[i]->hwnd, SW_HIDE);
-		}
-	}
+	foreach_tile(t,
+		ShowWindow(t->hwnd, (t->desktop == _active_desktop) ? SW_SHOWNA : SW_HIDE);
+	);
 }
 
-void init_layout() {	
+void layout_init() {	
+	_tiles = list_create();
 	//TODO: exclude it to separete event source
 	EnumWindows(enum_windows_proc, 0);
 }
 
-void dispose_layout() {	
+void layout_dispose() {	
 	show_all_windows();
-	for (int i = 0; i < _tiles_count; i++) {
-		dispose_tile(_tiles[i]);
-	}
-	_tiles_count = 0;
+	log_print("show_all_windows: Completed");
+	foreach_tile(t,	tile_dispose(t));
+	log_print("dispose each tile: Completed");
+	list_dispose(_tiles);
+	log_print("dispose tiles list: Completed");
 }

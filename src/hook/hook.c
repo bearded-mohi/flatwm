@@ -6,6 +6,9 @@
 #define SHARED __attribute__((section(".shr"), shared))
 #define UNSHARED
 
+
+//TODO: use both!
+
 #define CBT_HOOK
 // #define SHELL_HOOK
 

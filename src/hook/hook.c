@@ -6,8 +6,8 @@
 #define SHARED __attribute__((section(".shr"), shared))
 #define UNSHARED
 
-// #define CBT_HOOK
-#define SHELL_HOOK
+#define CBT_HOOK
+// #define SHELL_HOOK
 
 static HHOOK _shell_hook    UNSHARED = NULL;
 static HWND  _callback_hwnd SHARED   = NULL;
@@ -24,8 +24,14 @@ static LRESULT CALLBACK hook_proc(int nCode, WPARAM wParam, LPARAM lParam) {
 
     #ifdef CBT_HOOK
     if (HCBT_CREATEWND == nCode) {
-        LPCBT_CREATEWND cs = (LPCBT_CREATEWND) lParam;
-        if (0 == cs->lpcs->hwndParent) {
+        LPCBT_CREATEWND cs  = (LPCBT_CREATEWND) lParam;
+        
+        BOOL is_parentless  = (0 == cs->lpcs->hwndParent);
+        BOOL is_overlapped  = WS_OVERLAPPED == (WS_OVERLAPPED & cs->lpcs->style);
+        BOOL is_app_window  = WS_EX_APPWINDOW == (WS_EX_APPWINDOW & cs->lpcs->dwExStyle);
+        BOOL is_window_edge = WS_EX_WINDOWEDGE == (WS_EX_WINDOWEDGE & cs->lpcs->dwExStyle);
+        
+        if (is_overlapped && is_window_edge) {
             PostMessage(_callback_hwnd, SOME_WINDOW_CREATED, wParam, 0);
         }
     } else if (HCBT_DESTROYWND == nCode) {                

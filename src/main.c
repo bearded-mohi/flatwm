@@ -45,11 +45,9 @@ static LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 			break;
 		case SOME_WINDOW_CREATED:
 			layout_track((HWND) wParam);
-			log_print("some window created!");
 			break;
 		case SOME_WINDOW_DESTROYED:
 			layout_untrack((HWND) wParam);
-			log_print("window destroyed");
 			break;
 		case WM_HOTKEY:
 			dispatch_command(hwnd, wParam);

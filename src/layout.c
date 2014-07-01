@@ -62,7 +62,7 @@ void list_add(tile_list_s *self, Tile *tile) {
 	} else {
 		self->tail->next = new_item;
 		self->tail = new_item;
-	}	
+	}		
 }
 
 void list_remove(tile_list_s *self, HWND hwnd) {
@@ -75,6 +75,9 @@ void list_remove(tile_list_s *self, HWND hwnd) {
 				tile_dispose(cur->item);
 			} else {
 				prev->next = cur->next;
+				if (self->tail == cur) {
+					self->tail = prev;
+				}
 				tile_dispose(cur->item);
 			}
 		}
@@ -88,20 +91,22 @@ static tile_list_s *_tiles;
 static int _active_desktop = 1;
 
 static Tile* tile_create(HWND hwnd, const char *class_name, const char *caption, int desktop) {
-	Tile *t = malloc(sizeof(Tile));	
-	t->hwnd = hwnd;
-	t->class_name = malloc(strlen(class_name) + 1);
-	strcpy(t->class_name, class_name);
-	t->caption = malloc(strlen(caption) + 1);	
-	strcpy(t->caption, caption);
-	t->desktop = desktop;
-	return t;
+	Tile *self = malloc(sizeof(Tile));	
+	self->hwnd = hwnd;
+	self->class_name = malloc(strlen(class_name) + 1);
+	strcpy(self->class_name, class_name);
+	self->caption = malloc(strlen(caption) + 1);	
+	strcpy(self->caption, caption);
+	self->desktop = desktop;
+	log_print("+ tile_create:\n\tclass: %s\n\tcaption: %s\n", self->class_name, self->caption);
+	return self;
 }
 
-static void tile_dispose(Tile *tile) {
-	free(tile->class_name);
-	free(tile->caption);
-	free(tile);
+static void tile_dispose(Tile *self) {
+	log_print("- tile_dispose:\n\tclass: %s\n\tcaption: %s\n", self->class_name, self->caption);
+	free(self->class_name);
+	free(self->caption);
+	free(self);
 }
 
 static bool has_tile(HWND hwnd) {
@@ -111,19 +116,18 @@ static bool has_tile(HWND hwnd) {
 	return false;
 }
 
-void layout_track(HWND hwnd) {		
-	//TODO: exclude is_window_managable in separete filter
-	if (!has_tile(hwnd) && is_window_managable(hwnd)) {
+void layout_track(HWND hwnd) {			
+	if (!has_tile(hwnd)) {
 		char caption[256];
 		char class_name[256];
 		GetWindowText(hwnd, caption, 256);
-		GetClassName(hwnd, class_name, 256);			
-		list_add(_tiles, tile_create(hwnd, class_name, caption, _active_desktop));
+		GetClassName(hwnd, class_name, 256);
+		list_add(_tiles, tile_create(hwnd, class_name, caption, _active_desktop));		
 	}			
 }
 
 void layout_untrack(HWND hwnd) {
-	// list_remove(_tiles, hwnd);
+	list_remove(_tiles, hwnd);
 }
 
 static BOOL is_window_managable(HWND hwnd) {
@@ -147,9 +151,9 @@ static BOOL is_window_managable(HWND hwnd) {
     ti.cbSize = sizeof(ti);
     GetTitleBarInfo(hwnd, &ti);
     //TODO: why STATE_SYSTEM_INVISIBLE is undefined for winxp?
-    // if(ti.rgstate[0] & STATE_SYSTEM_INVISIBLE) {
-    //     return FALSE;
-    // }
+    if(ti.rgstate[0] & STATE_SYSTEM_INVISIBLE) {
+        return FALSE;
+    }
     if(GetWindowLong(hwnd, GWL_EXSTYLE) & WS_EX_TOOLWINDOW) {
         return FALSE;
     }
@@ -163,7 +167,10 @@ static void show_all_windows() {
 }
 
 static BOOL CALLBACK enum_windows_proc(HWND hwnd, LPARAM lParam) {
-	layout_track(hwnd);
+	//TODO: exclude is_window_managable in separete filter
+	if (is_window_managable(hwnd)) {
+		layout_track(hwnd);
+	}	
 	return TRUE;
 }
 

@@ -7,6 +7,8 @@ typedef struct Tile Tile;
 
 Tile              *tile_create(HWND hwnd, const char *class_name, const char *caption, int desktop);
 HWND               tile_get_hwnd(Tile *self);
+void               tile_show(Tile *self);
+void               tile_hide(Tile *self);
 char const * const tile_get_class_name(Tile *self);
 char const * const tile_get_caption(Tile *self);
 int                tile_get_desktop(Tile *self);

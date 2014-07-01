@@ -27,6 +27,14 @@ HWND tile_get_hwnd(Tile *self) {
 	return self->hwnd;
 }
 
+void tile_show(Tile *self) {
+	ShowWindow(self->hwnd, SW_SHOW);
+}
+
+void tile_hide(Tile *self) {
+	ShowWindow(self->hwnd, SW_HIDE);
+}
+
 char const * const tile_get_class_name(Tile *self) {
 	return self->class_name;
 }

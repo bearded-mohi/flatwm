@@ -6,6 +6,7 @@
 
 #include "tile.h"
 
+//TODO: create iterator and hide this struct
 typedef struct Tile_Item {
 	Tile               *item;
 	struct Tile_Item   *next;

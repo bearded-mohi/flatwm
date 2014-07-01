@@ -27,6 +27,7 @@ void layout_untrack(HWND hwnd) {
 	list_remove(_tiles, hwnd);
 }
 
+//TODO: use the same filter as hook use
 static BOOL is_window_managable(HWND hwnd) {
 	TITLEBARINFO ti;
     HWND hwndTry = NULL;
@@ -55,12 +56,6 @@ static BOOL is_window_managable(HWND hwnd) {
         return FALSE;
     }
     return TRUE;
-}
-
-static void show_all_windows() {
-	foreach_tile(_tiles, t,
-		ShowWindow(tile_get_hwnd(t), SW_SHOW);
-	)
 }
 
 static BOOL CALLBACK enum_windows_proc(HWND hwnd, LPARAM lParam) {
@@ -101,7 +96,7 @@ void move_window_to_desktop(int n) {
 	foreach_tile(_tiles, t,
 		if (tile_get_hwnd(t) == foreground) {
 			tile_set_desktop(t, n);
-			ShowWindow(tile_get_hwnd(t), SW_HIDE);
+			tile_hide(t);
 			break;
 		}
 	);
@@ -112,7 +107,11 @@ void go_to_desktop(int n) {
 
 	_active_desktop = n;
 	foreach_tile(_tiles, t,
-		ShowWindow(tile_get_hwnd(t), (tile_get_desktop(t) == _active_desktop) ? SW_SHOWNA : SW_HIDE);
+		if (tile_get_desktop(t) == _active_desktop) {
+			tile_show(t);
+		} else {
+			tile_hide(t);
+		}		
 	);
 }
 
@@ -123,10 +122,12 @@ void layout_init() {
 }
 
 void layout_dispose() {	
-	show_all_windows();
-	log_print("show_all_windows: Completed");
+	foreach_tile(_tiles, t, tile_show(t));
+	log_print("show all windows: Completed");
+
 	foreach_tile(_tiles, t,	tile_dispose(t));
 	log_print("dispose each tile: Completed");
+
 	list_dispose(_tiles);
 	log_print("dispose tiles list: Completed");
 }
